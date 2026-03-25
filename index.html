@@ -24,7 +24,7 @@
       --r:        10px;
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
 
     body {
       background: var(--bg);
@@ -391,6 +391,26 @@
     }
     .pill:hover { border-color: rgba(79,142,255,0.45); color: #fff; transform: translateY(-1px); }
 
+    .discord-pill { cursor: pointer; font-family: 'DM Sans', sans-serif; position: relative; }
+    .discord-label { transition: opacity .15s; }
+    .discord-copied {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 100px;
+      background: var(--s1);
+      color: #5dbb7f;
+      font-size: 0.8rem;
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s;
+    }
+    .discord-pill.did-copy .discord-label { opacity: 0; }
+    .discord-pill.did-copy .discord-copied { opacity: 1; }
+
     /* ── FOOTER ── */
     footer {
       border-top: 1px solid var(--border);
@@ -452,11 +472,11 @@
       <em>Scripting only.</em>
     </h1>
     <p class="hero-sub">
-      I'm Jubileu — I specialize in <strong>movement systems, combat, server-side optimization, and replication</strong>. I write clean, maintainable Luau that holds up at scale.
+      I'm Jubileu. I specialize in <strong>movement systems, combat, server-side optimization, and replication</strong>. I write clean, maintainable Luau that holds up when things get serious.
     </p>
     <div class="notice">
       <span class="notice-icon">⚠️</span>
-      I do scripting exclusively — no modeling, no building, no animation.
+      Scripting only. No modeling, building, or animation.
     </div>
     <div class="hero-cta">
       <a href="#work" class="btn btn-blue">See my work</a>
@@ -472,9 +492,9 @@
   <h2 class="sec-title">What I actually <em>do</em></h2>
   <div class="about-grid">
     <div class="about-body">
-      <p>Six years writing Luau for Roblox. My focus is the hard stuff — <strong>custom character controllers, combat state machines, lag compensation, and efficient server replication</strong>. I do both client and server, and I care equally about both.</p>
-      <p>Frontend to me means UI systems, viewport rendering, and responsive feedback — not just screens. Backend means authoritative game logic, data architecture, and keeping the server fast under load.</p>
-      <p>Open to commissions and client projects. If you need scripting done right, I'm the one to call.</p>
+      <p>Six years writing Luau for Roblox. I focus on the hard stuff: <strong>custom character controllers, combat state machines, lag compensation, and efficient server replication</strong>. I work on both client and server, and I care equally about both.</p>
+      <p>Frontend to me means UI systems, viewport rendering, and responsive feedback. Not just screens. Backend means authoritative game logic, data architecture, and keeping the server fast under load.</p>
+      <p>Open to commissions and client projects. If you need scripting done right, reach out.</p>
     </div>
     <div class="spec-grid">
       <div class="spec-card">
@@ -573,17 +593,20 @@
 <div class="contact-wrap" id="contact">
   <div>
     <h2 class="contact-h">Let's work<br>together<span>.</span></h2>
-    <p class="contact-sub">Reach out on Discord or check my Roblox profile. Scripting commissions only.</p>
+    <p class="contact-sub">Drop me a message on Discord or take a look at my Roblox profile. Scripting commissions only.</p>
   </div>
   <div class="contact-links">
-    <a href="https://discord.com/users/jubileuv2" target="_blank" rel="noopener" class="pill">💬 jubileuv2</a>
-    <a href="https://www.roblox.com/users/27924383/profile" target="_blank" rel="noopener" class="pill">🎮 Roblox</a>
+    <button class="pill discord-pill" onclick="copyDiscord(this)" aria-label="Copy Discord username">
+      <span class="discord-label">💬 jubileuv2</span>
+      <span class="discord-copied" aria-hidden="true">✓ Copied!</span>
+    </button>
+    <a href="https://www.roblox.com/users/269577254/profile" target="_blank" rel="noopener" class="pill">🎮 Roblox</a>
   </div>
 </div>
 
 <footer>
   <span class="footer-logo">jubileu<span>.</span></span>
-  <p>Roblox · Frontend & Backend · Scripting only · 6 yrs</p>
+  <p>Roblox / Frontend & Backend / Scripting only / 6 yrs</p>
 </footer>
 
 <script>
@@ -591,6 +614,13 @@
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 40);
   }, {passive: true});
+
+  function copyDiscord(Btn) {
+    navigator.clipboard.writeText('jubileuv2').then(() => {
+      Btn.classList.add('did-copy');
+      setTimeout(() => Btn.classList.remove('did-copy'), 1800);
+    });
+  }
 </script>
 </body>
 </html>
