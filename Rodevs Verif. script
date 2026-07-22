@@ -1,0 +1,350 @@
+--made by jubileuv2, same guy that has kmap studios in his profile and portolio and number names, etc etc...
+--👍
+
+local Debris = game:GetService("Debris")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Framework = ReplicatedStorage.Framework
+local Packages = Framework.Packages
+
+local Assets = script.Assets
+
+local Settings = require(script.Settings)
+
+local Replicator = require(Packages.Replicator)
+local Bouncy = require(Packages.Bouncy)
+
+local Handler = Replicator.GetReplicatedTable()
+local EnabledGrenades = {}
+
+local Guaranteed = {}
+
+--makes part 👍
+local function MakePart(Info : {})
+	local Part = Instance.new("Part")
+
+	Part.Anchored = true
+	Part.Size = Vector3.one
+
+	for Name, Value in Info do
+		Part[Name] = Value
+	end
+
+	Part.CanCollide = false
+	Part.CanTouch = false
+	Part.CanQuery = false
+
+	Part.Parent = workspace
+	Debris:AddItem(Part, 2)
+	return Part
+end
+
+--guarantees player has tool 👍
+local function ToolGuaranteed(Player : Player, IsGuaranteed : boolean)
+	if IsGuaranteed then
+		Guaranteed[Player] = Guaranteed[Player] or {}
+
+		local Character = Player.Character or Player.CharacterAdded:Wait()
+
+		local function GrantTool()
+			--don't give multiple grenades if one already exists 👍
+			local Backpack = Player:FindFirstChildOfClass("Backpack")
+			if not Backpack then return end
+
+			local Existing = Character:FindFirstChild("Grenade") or Backpack:FindFirstChild("Grenade")
+			if Existing then return end
+
+			local Tool = Assets.Grenade:Clone()
+			Tool.Parent = Backpack
+		end
+
+		GrantTool()
+
+		--regrants the tool after the player respawns 👍
+		table.insert(Guaranteed[Player], Player.CharacterAdded:Connect(function(NewCharacter)
+			Character = NewCharacter
+			GrantTool()
+		end))
+	else
+		local Valid = Guaranteed[Player]
+		if not Valid then return end 
+
+		--disconnects the respawn conns before removing the guarantee 👍
+		for _, Connection in Valid do
+			Connection:Disconnect()
+		end
+
+		Guaranteed[Player] = nil
+
+		local Character = Player.Character
+		local Backpack = Player:FindFirstChildOfClass("Backpack")
+
+		if not Character or not Backpack then return end
+
+		--removes the existing grenade from the player 👍
+		local Old = Character:FindFirstChild("Grenade") or Backpack:FindFirstChild("Grenade")
+		if not Old then return end 
+
+		Old:Destroy()
+	end
+end
+
+--clean player data when they leave 👍
+Players.PlayerRemoving:Connect(function(Player)
+	EnabledGrenades[Player] = nil
+
+	local Connections = Guaranteed[Player]
+	if not Connections then return end
+
+	--disconnects anything still listening for this player 👍
+	for _, Connection in Connections do
+		Connection:Disconnect()
+	end
+
+	Guaranteed[Player] = nil
+end)
+
+--makes ray in direction 👍
+local function DoRay(Start, Direction, Params)
+	return workspace:Raycast(Start, Direction.Unit * Settings.ExplosionRange, Params)
+end
+
+--explode grenade and damage players 👍
+local function ExplodeGrenade(Object : Model)
+	if not Object or not Object.Parent then return end
+
+	local Start = Object:GetPivot().Position
+	local Degrees = Settings.Degrees
+
+	--to ignore bomb 👍
+	local Arguments = RaycastParams.new()
+	Arguments.FilterType = Enum.RaycastFilterType.Exclude
+	Arguments:AddToFilter(Object)
+
+	--visual explosion without applying roblox bomb damage 👍
+	local Explosion = Instance.new("Explosion")
+	Explosion.BlastPressure = 0
+	Explosion.BlastRadius = 0
+	Explosion.DestroyJointRadiusPercent = 0
+	Explosion.ExplosionType = Enum.ExplosionType.NoCraters
+
+	Explosion.Position = Start
+	Explosion.Parent = workspace
+
+	--stores how many rays hits chars 👍
+	local Hit = {}
+
+	--spherical area rays boom 👍
+	for X = Degrees.X, 360, Degrees.X do
+		for Y = Degrees.Y, 360, Degrees.Y do
+			local SecondAngle = CFrame.fromEulerAnglesYXZ(math.rad(X), math.rad(Y), 0)
+			local SecondDirection = SecondAngle.LookVector
+
+			local Info = DoRay(Start, SecondDirection, Arguments)
+
+			if Info and Info.Instance then
+				local Instance = Info.Instance
+
+				--finds the character from whatever part was hit 👍
+				local Character = Instance:FindFirstAncestorWhichIsA("Model")
+				if not Character then continue end 
+
+				--only players are valid explosion targets 👍
+				local ValidChar = Players:GetPlayerFromCharacter(Character)
+				if not ValidChar then continue end
+
+				--more rays hitting the same character means more damage, closer to bomb = more damage then 👍
+				Hit[Character] = (Hit[Character] or 0) + 1
+			end
+		end
+	end
+
+	--applies damage based on how many rays reached each character 👍
+	for Character, Count in Hit do
+		local ToTake = Count * Settings.DamagePerRay
+		local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+
+		if not Humanoid then continue end
+		if Humanoid.Health <= 0 then continue end
+
+		Humanoid:TakeDamage(math.round(ToTake))
+	end
+
+	Object:Destroy()
+end
+
+function Handler.SetupGrenades()
+	--client only 👍
+	local IsClient = RunService:IsClient()
+	if not IsClient then return end 
+
+	local Player = Players.LocalPlayer
+
+	local Connections = {}
+
+	--removing old conns 👍
+	local function ClearConnections()
+		for _, Connection : RBXScriptConnection in Connections do
+			Connection:Disconnect()
+		end
+
+		Connections = {}
+	end
+
+	--makes the grenade tool actually throw 👍
+	local function HandleGrenade(Tool : Tool)
+		if not Tool then return end 
+
+		Connections[#Connections + 1] = Tool.Activated:Connect(function()
+			local Character = Player.Character
+
+			local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+			if not Humanoid then return end
+
+			--dead players cannot throw grenades 👍
+			local Alive = Humanoid.Health > 0
+			if not Alive then return end 
+
+			Handler.ThrowGrenade()
+		end)
+	end
+
+	--handles tools being equipped or added to the character 👍
+	local function HandleCharacter(Character)
+		Character.ChildAdded:Connect(function(Child : Instance)
+			local Valid = Child:IsA("Tool")
+			if not Valid then return end 
+
+			--only reconnect if this is actually the grenade 👍
+			if Child.Name ~= "Grenade" then return end
+
+			ClearConnections()
+			HandleGrenade(Child)
+		end)
+
+		--removes the activation conn when the tool leaves the character 👍
+		Character.ChildRemoved:Connect(function(Child : Instance)
+			local Valid = Child:IsA("Tool")
+			if not Valid then return end 
+
+			if Child.Name ~= "Grenade" then return end
+
+			ClearConnections()
+		end)
+	end
+
+	--initializes the current character or it'd only work for respawns 👍
+	local Character = Player.Character or Player.CharacterAdded:Wait()
+	local Tool = Character:FindFirstChild("Grenade")
+
+	HandleGrenade(Tool)
+	HandleCharacter(Character)
+
+	--reconnects the grenade system after every respawn 👍
+	Player.CharacterAdded:Connect(HandleCharacter)
+end
+
+Handler.SetupGrenades()
+
+--for reference, my replicator is just a way to skip remote events.
+--with that said, client-server examople:
+--just call it from the client and it'll return args to the server. boom. easy;
+
+--[[Client and server]]
+
+Handler:CreateFunction("Client-Server", {
+	Name = "ThrowGrenade";
+	Callback = "StoreLatest";
+	Reference = script;
+
+	Server = function(Player : Player, Direction : Vector3)
+		--server decides if this player is allowed to throw 👍
+		local Valid = EnabledGrenades[Player]
+		if not Valid then return end
+
+		--makes sure the player still has a character 👍
+		local Character = Player.Character
+		if not Character then return end
+
+		--makes sure the character is still alive 👍
+		local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+		if not Humanoid or Humanoid.Health <= 0 then return end
+
+		--makes sure the direction is actually usable 👍
+		if Direction.Magnitude <= 0 then return end
+
+		--removes vertical input👍
+		Direction = Direction.Unit * Vector3.new(1,0,1)
+
+		local Object = Assets.WorldModel.Object:Clone()
+
+		local Offset = Settings.Offset
+
+		--places the grenade relative to the char's current CFrame 👍
+		local CharPivot = Character:GetPivot()
+		local StartingCFrame = CharPivot * CFrame.new(Offset)
+
+		--converts the velocity into world space cuz relative math or it'd go the wrong direction based on look vector 👍
+		local Force = CharPivot:VectorToWorldSpace(Settings.Velocity * Vector3.new(1,0,1)) + Vector3.new(0,Settings.Velocity.Y,0)
+
+		Object:PivotTo(StartingCFrame)
+		Object.Parent = workspace
+
+		--uses bouncy physics module to launch the grenade 👍
+		Bouncy.Launch(Object, Force, 1)
+
+		--time for it to exist before boom 👍
+		task.wait(Settings.TimeBeforeBoom)
+
+		--the object could have been destroyed before the timer ended 👍
+		if not Object.Parent then return end
+
+		ExplodeGrenade(Object)
+	end,
+
+	Client = function()
+		--sending current cam direction because this is how my replicator works 👍
+		local Camera = workspace.CurrentCamera
+		if not Camera then return end
+
+		local Direction = Camera.CFrame.LookVector
+
+		return {Arguments = {Direction}}
+	end,
+})
+
+--[[Client and server]]
+
+Handler:CreateFunction("Server-Client", {
+	Name = "EnableForPlayer";
+	Callback = "StoreLatest";
+	Reference = script;
+
+	Server = function(Player : Player, Enabled : boolean)
+		--stores the permission server-side so client cant enable itself 👍
+		EnabledGrenades[Player] = Enabled
+
+		--keeps bomb sync with the player perm👍
+		ToolGuaranteed(Player, Enabled)
+
+		--only replicates the new state to the player being modified 👍
+		return {Arguments = {Enabled}, FiredTo = {Player}}
+	end,
+
+	Client = function(Enabled : boolean)
+		--updates the local state 👍
+		EnabledGrenades = Enabled
+	end,
+})
+
+return Handler :: typeof({
+	--[[SERVER ONLY. Enables or disables grenade usage for a specific player.]]
+	EnableForPlayer = function(Player : Player, Enabled : boolean) 
+	end,
+
+	--[[CLIENT ONLY. Uses the player's camera direction to throw a grenade.]]
+	ThrowGrenade = function()
+	end,
+})
