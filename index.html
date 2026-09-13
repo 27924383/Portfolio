@@ -3,772 +3,773 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Jubileu, Roblox Developer</title>
+	<meta name="description" content="jub, Roblox scripter. 6+ years of Luau. Backend systems, gameplay mechanics, networking. Scripting only.">
+	<title>jub, Roblox scripter</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&family=Archivo:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+	<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231E4A3C'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='19' fill='%23EBE3D4' text-anchor='middle'%3Ej%3C/text%3E%3C/svg%3E">
 	<style>
-	*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+	*, *::before, *::after { box-sizing: border-box; }
 
 	:root {
-		--bg:      #0b0d12;
-		--s1:      #11141b;
-		--s2:      #161a23;
-		--accent:  #5b8def;
-		--text:    #d0d4dd;
-		--dim:     #6b6f7d;
-		--dimmer:  #3e414c;
-		--border:  #1c1f2a;
-		--green:   #6ec07a;
+		--paper: #ebe3d4;
+		--paper2: #e2d9c7;
+		--ink: #17150f;
+		--text: #3c382e;
+		--muted: #837a67;
+		--rule: #d1c7b2;
+		--rule-strong: #b9ae96;
+		--accent: #1e4a3c;
 	}
 
-	html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+	html {
+		scroll-behavior: smooth;
+		scroll-padding-top: 5rem;
+	}
 
 	body {
-		background: var(--bg);
+		margin: 0;
+		background: var(--paper);
 		color: var(--text);
-		font-family: 'DM Sans', sans-serif;
-		font-size: 15px;
-		line-height: 1.7;
-		overflow-x: hidden;
+		font-family: 'Archivo', system-ui, sans-serif;
+		font-size: 16px;
+		line-height: 1.6;
 		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
 	}
 
-	::selection { background: var(--accent); color: #fff; }
-	::-webkit-scrollbar { width: 3px; }
-	::-webkit-scrollbar-track { background: var(--bg); }
-	::-webkit-scrollbar-thumb { background: var(--s2); }
-	a { color: inherit; text-decoration: none; }
-
-	nav {
+	body::after {
+		content: '';
 		position: fixed;
-		inset: 0 0 auto 0;
-		z-index: 100;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem 2.5rem;
-		transition: background .3s, border-color .3s;
-		border-bottom: 1px solid transparent;
+		inset: 0;
+		z-index: 90;
+		pointer-events: none;
+		opacity: .05;
+		mix-blend-mode: multiply;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 	}
-	nav.scrolled {
-		background: rgba(11,13,18,0.92);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		border-color: var(--border);
-	}
-	.logo {
+
+	a { color: inherit; }
+
+	::selection { background: var(--accent); color: var(--paper); }
+	:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+	.skip {
+		position: absolute;
+		left: -9999px;
+		top: 0;
+		background: var(--ink);
+		color: var(--paper);
+		padding: .6rem 1rem;
 		font-family: 'DM Mono', monospace;
-		font-size: 0.85rem;
-		font-weight: 500;
-		color: #fff;
+		font-size: .75rem;
+		z-index: 200;
 	}
-	.logo span { color: var(--accent); }
-	.nav-links { display: flex; gap: 1.75rem; list-style: none; }
+	.skip:focus { left: 1rem; top: 1rem; }
+
+	/* ---------- nav ---------- */
+
+	.nav {
+		position: fixed;
+		inset: 0 0 auto;
+		z-index: 100;
+		border-bottom: 1px solid transparent;
+		transition: border-color .2s, background .2s;
+	}
+	.nav.is-stuck {
+		background: rgba(235,227,212,.93);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border-bottom-color: var(--rule);
+	}
+	.nav-inner {
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: 0 2.5rem;
+		height: 4.4rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.5rem;
+	}
+	.brand {
+		font-family: 'DM Mono', monospace;
+		font-size: .92rem;
+		font-weight: 500;
+		text-decoration: none;
+		color: var(--ink);
+	}
+	.nav-links {
+		display: flex;
+		gap: 1.4rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
 	.nav-links a {
 		font-family: 'DM Mono', monospace;
-		font-size: 0.72rem;
-		color: var(--dim);
-		transition: color .2s;
+		font-size: .74rem;
+		color: var(--muted);
+		text-decoration: none;
+		border-bottom: 1px solid transparent;
+		padding-bottom: 2px;
 	}
-	.nav-links a:hover { color: var(--text); }
+	.nav-links a:hover {
+		color: var(--ink);
+		border-bottom-color: var(--rule-strong);
+	}
+
+	/* ---------- shell ---------- */
+
+	.shell {
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: 0 2.5rem;
+	}
+
+	/* ---------- hero ---------- */
 
 	.hero {
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		padding: 6rem 2.5rem 4rem;
-		position: relative;
-		overflow: hidden;
+		display: grid;
+		grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr);
+		gap: clamp(2rem, 5vw, 5rem);
+		align-items: start;
+		padding-top: 8.5rem;
+		padding-bottom: 4.5rem;
 	}
-
-	.hero-glow {
-		position: absolute;
-		pointer-events: none;
-		border-radius: 50%;
-	}
-	.glow-a {
-		width: 700px; height: 400px;
-		background: radial-gradient(ellipse, rgba(91,141,239,0.07) 0%, transparent 65%);
-		top: -60px; right: -120px;
-	}
-
-	.hero-inner { position: relative; z-index: 1; max-width: 720px; }
-
-	.hero-kicker {
+	.hero-label {
 		font-family: 'DM Mono', monospace;
-		font-size: 0.7rem;
+		font-size: .7rem;
+		letter-spacing: .1em;
+		text-transform: uppercase;
 		color: var(--accent);
-		letter-spacing: 0.06em;
-		margin-bottom: 1.75rem;
-		opacity: 0;
-		animation: Fade .5s ease .05s forwards;
+		margin: 0 0 1.4rem;
 	}
-	.hero-kicker::before {
-		content: "> ";
-		color: var(--dimmer);
+	h1 {
+		font-family: 'Newsreader', Georgia, serif;
+		font-weight: 400;
+		font-size: clamp(2.5rem, 6vw, 4.6rem);
+		line-height: 1.03;
+		letter-spacing: -.02em;
+		color: var(--ink);
+		margin: 0;
+	}
+	.hero-lead {
+		font-size: clamp(1rem, 1.4vw, 1.12rem);
+		line-height: 1.7;
+		max-width: 46ch;
+		margin: 1.6rem 0 0;
+		color: var(--text);
 	}
 
-	.hero-title {
-		font-size: clamp(2.6rem, 6vw, 4.2rem);
-		font-weight: 700;
-		line-height: 1.1;
-		letter-spacing: -0.035em;
-		color: #fff;
-		margin-bottom: 1.5rem;
-		opacity: 0;
-		animation: Fade .55s ease .12s forwards;
+	.facts {
+		margin: 0;
+		border-top: 1px solid var(--ink);
 	}
-	.hero-title .accent { color: var(--accent); }
-
-	.hero-sub {
-		font-size: 1rem;
-		font-weight: 300;
-		color: var(--dim);
-		max-width: 520px;
-		line-height: 1.8;
-		margin-bottom: 2.5rem;
-		opacity: 0;
-		animation: Fade .55s ease .2s forwards;
+	.facts-row {
+		display: grid;
+		grid-template-columns: 96px 1fr;
+		gap: 1rem;
+		padding: .68rem 0;
+		border-bottom: 1px solid var(--rule);
 	}
-	.hero-sub strong { color: var(--text); font-weight: 500; }
-
-	.notice {
+	.facts-row dt {
 		font-family: 'DM Mono', monospace;
-		font-size: 0.68rem;
-		color: var(--green);
-		margin-bottom: 2rem;
-		opacity: 0;
-		animation: Fade .55s ease .28s forwards;
+		font-size: .68rem;
+		letter-spacing: .07em;
+		text-transform: uppercase;
+		color: var(--muted);
+		padding-top: .22rem;
 	}
-	.notice::before {
-		content: "// ";
-		color: var(--dimmer);
+	.facts-row dd {
+		margin: 0;
+		font-size: .9rem;
+		color: var(--ink);
 	}
 
-	.hero-cta {
+	.quote {
+		border-top: 1px solid var(--rule);
+		border-bottom: 1px solid var(--rule);
+		background: var(--paper2);
+	}
+	.quote p {
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: 1.5rem 2.5rem;
+		font-family: 'Newsreader', Georgia, serif;
+		font-size: clamp(1.05rem, 2vw, 1.4rem);
+		line-height: 1.45;
+		color: var(--ink);
+	}
+
+	/* ---------- bands ---------- */
+
+	.band { border-top: 1px solid var(--rule); }
+	.band-inner {
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: clamp(3rem, 6vw, 5rem) 2.5rem;
+		display: grid;
+		grid-template-columns: 150px minmax(0, 1fr);
+		gap: clamp(1.25rem, 4vw, 3.5rem);
+	}
+	.band-inner > div { min-width: 0; }
+	.band-label {
+		font-family: 'DM Mono', monospace;
+		font-size: .68rem;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color: var(--muted);
+		margin: 0;
+		padding-top: .35rem;
+	}
+	h2 {
+		font-family: 'Newsreader', Georgia, serif;
+		font-weight: 400;
+		font-size: clamp(1.7rem, 3.4vw, 2.7rem);
+		line-height: 1.12;
+		letter-spacing: -.015em;
+		color: var(--ink);
+		margin: 0 0 1.4rem;
+	}
+	.band-note {
+		font-size: .86rem;
+		color: var(--muted);
+		margin: 0 0 2rem;
+		max-width: 52ch;
+	}
+
+	/* ---------- services table ---------- */
+
+	.table-wrap {
+		overflow-x: auto;
+		scrollbar-width: thin;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		min-width: 520px;
+	}
+	thead th {
+		text-align: left;
+		font-family: 'DM Mono', monospace;
+		font-size: .66rem;
+		font-weight: 500;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+		color: var(--muted);
+		padding: 0 1.5rem .6rem 0;
+		border-bottom: 1px solid var(--ink);
+	}
+	tbody td {
+		padding: .95rem 1.5rem .95rem 0;
+		border-bottom: 1px solid var(--rule);
+		vertical-align: top;
+		font-size: .88rem;
+		line-height: 1.55;
+	}
+	tbody th {
+		text-align: left;
+		font-weight: 600;
+		font-size: .88rem;
+		color: var(--ink);
+		padding: .95rem 1.5rem .95rem 0;
+		border-bottom: 1px solid var(--rule);
+		vertical-align: top;
+	}
+	tbody tr:last-child td, tbody tr:last-child th { border-bottom: none; }
+
+	/* ---------- work ---------- */
+
+	.work-list { list-style: none; margin: 0; padding: 0; }
+	.work-item { border-top: 1px solid var(--rule); }
+	.work-item:last-child { border-bottom: 1px solid var(--rule); }
+	.work-link {
+		display: grid;
+		grid-template-columns: 128px minmax(0, 1fr) auto;
+		gap: 1.25rem;
+		align-items: center;
+		padding: .8rem 0;
+		text-decoration: none;
+	}
+	.work-thumb {
+		aspect-ratio: 16 / 9;
+		overflow: hidden;
+		background: var(--paper2);
+		border: 1px solid var(--rule);
+	}
+	.work-thumb img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		filter: sepia(.22) saturate(.72) contrast(1.03);
+		transition: filter .25s;
+	}
+	.work-link:hover .work-thumb { border-color: var(--accent); }
+	.work-link:hover .work-thumb img { filter: none; }
+	.work-num {
+		font-family: 'DM Mono', monospace;
+		font-size: .66rem;
+		color: var(--muted);
+		display: block;
+		margin-bottom: .25rem;
+	}
+	.work-title {
+		font-family: 'Newsreader', Georgia, serif;
+		font-size: clamp(1.05rem, 2vw, 1.3rem);
+		line-height: 1.2;
+		color: var(--ink);
+		margin: 0;
+	}
+	.work-tag {
+		font-size: .8rem;
+		color: var(--muted);
+		margin: .25rem 0 0;
+	}
+	.work-go {
+		font-family: 'DM Mono', monospace;
+		font-size: .7rem;
+		color: var(--muted);
+		white-space: nowrap;
+	}
+	.work-link:hover .work-title {
+		text-decoration: underline;
+		text-decoration-color: var(--rule-strong);
+		text-underline-offset: 4px;
+	}
+	.work-link:hover .work-go { color: var(--accent); }
+
+	/* ---------- scope ---------- */
+
+	.scope-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: clamp(1.5rem, 4vw, 3.5rem);
+	}
+	.scope-col h3 {
+		font-family: 'DM Mono', monospace;
+		font-size: .68rem;
+		font-weight: 500;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+		color: var(--muted);
+		margin: 0 0 .4rem;
+	}
+	.scope-col.take h3 { color: var(--accent); }
+	.scope-col p {
+		font-size: .9rem;
+		line-height: 1.65;
+		margin: 0;
+		padding-top: .9rem;
+		border-top: 1px solid var(--rule);
+	}
+	.scope-col.take p { border-top-color: var(--ink); }
+	.scope-col p + p { border-top: none; padding-top: .5rem; }
+
+	/* ---------- process ---------- */
+
+	.steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+	.steps li {
+		counter-increment: step;
+		display: grid;
+		grid-template-columns: 2.6rem minmax(0, 1fr);
+		gap: 1rem;
+		padding: 1rem 0;
+		border-bottom: 1px solid var(--rule);
+	}
+	.steps li:first-child { border-top: 1px solid var(--ink); }
+	.steps li::before {
+		content: counter(step, decimal-leading-zero);
+		font-family: 'DM Mono', monospace;
+		font-size: .68rem;
+		color: var(--accent);
+		padding-top: .35rem;
+	}
+	.steps p { margin: 0; font-size: .92rem; line-height: 1.6; }
+
+	/* ---------- about ---------- */
+
+	.about p {
+		font-size: .97rem;
+		line-height: 1.75;
+		max-width: 62ch;
+		margin: 0;
+	}
+	.about p + p { margin-top: 1.05rem; }
+
+	/* ---------- contact ---------- */
+
+	.contact-band { border-top: 1px solid var(--rule); background: var(--paper2); }
+	.contact-inner {
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: clamp(3.5rem, 7vw, 6rem) 2.5rem;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 2.5rem;
+		align-items: end;
+	}
+	.contact-inner h2 { margin-bottom: .9rem; }
+	.contact-inner p {
+		font-size: .95rem;
+		line-height: 1.7;
+		max-width: 54ch;
+		margin: 0;
+	}
+	.contact-actions {
 		display: flex;
-		gap: 0.6rem;
-		opacity: 0;
-		animation: Fade .55s ease .35s forwards;
+		flex-wrap: wrap;
+		gap: .55rem;
+		justify-content: flex-end;
 	}
-
 	.btn {
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
+		min-height: 44px;
+		padding: .7rem 1.1rem;
 		font-family: 'DM Mono', monospace;
-		font-size: 0.74rem;
+		font-size: .74rem;
 		font-weight: 500;
-		padding: 0.6rem 1.2rem;
-		transition: all .15s;
-		cursor: pointer;
-		border: none;
-	}
-	.btn-blue {
-		background: var(--accent);
-		color: #fff;
-	}
-	.btn-blue:hover { background: #6b9aff; }
-	.btn-outline {
+		color: var(--ink);
 		background: transparent;
-		color: var(--dim);
-		border: 1px solid var(--border);
+		border: 1px solid var(--rule-strong);
+		text-decoration: none;
+		cursor: pointer;
+		transition: background .15s, color .15s, border-color .15s;
 	}
-	.btn-outline:hover { border-color: var(--accent); color: var(--text); }
+	.btn:hover {
+		background: var(--ink);
+		border-color: var(--ink);
+		color: var(--paper);
+	}
+	.copy { position: relative; }
+	.copy .done { display: none; }
+	.copy.is-done { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+	.copy.is-done .label { display: none; }
+	.copy.is-done .done { display: inline; }
 
-	.divider { height: 1px; background: var(--border); margin: 0 2.5rem; }
+	/* ---------- footer ---------- */
 
-	.sec { padding: 5rem 2.5rem; max-width: 1000px; margin: 0 auto; }
-	.sec-label {
-		font-family: 'DM Mono', monospace;
-		font-size: 0.65rem;
-		letter-spacing: 0.1em;
-		color: var(--dim);
-		margin-bottom: 0.5rem;
-	}
-	.sec-label::before {
-		content: "// ";
-		color: var(--dimmer);
-	}
-	.sec-title {
-		font-size: clamp(1.5rem, 2.8vw, 2.2rem);
-		font-weight: 700;
-		letter-spacing: -0.025em;
-		line-height: 1.2;
-		color: #fff;
-		margin-bottom: 1rem;
-	}
-	.sec-title .accent { color: var(--accent); }
-
-	.about-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 4rem;
-		margin-top: 2.5rem;
-		align-items: start;
-	}
-
-	.about-body {
-		font-size: 0.88rem;
-		color: var(--dim);
-		line-height: 1.85;
-	}
-	.about-body p + p { margin-top: 0.85rem; }
-	.about-body strong { color: var(--text); font-weight: 500; }
-
-	.spec-list {
+	.footer { border-top: 1px solid var(--rule); }
+	.footer-inner {
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: 1.4rem 2.5rem;
 		display: flex;
-		flex-direction: column;
-	}
-	.spec-item {
-		display: grid;
-		grid-template-columns: 110px 1fr;
+		justify-content: space-between;
 		gap: 1rem;
-		padding: 0.85rem 0;
-		border-bottom: 1px solid var(--border);
-		align-items: start;
-	}
-	.spec-item:last-child { border-bottom: none; }
-	.spec-tag {
 		font-family: 'DM Mono', monospace;
-		font-size: 0.68rem;
-		color: var(--accent);
-		letter-spacing: 0.03em;
-		padding-top: 0.1rem;
-	}
-	.spec-desc {
-		font-size: 0.8rem;
-		color: var(--dim);
-		line-height: 1.6;
-	}
-	.spec-desc strong { color: var(--text); font-weight: 500; }
-
-	.why-wrap {
-		padding: 5rem 2.5rem;
-		max-width: 1000px;
-		margin: 0 auto;
-	}
-	.why-lead {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 4rem;
-		align-items: end;
-		margin-bottom: 3rem;
-	}
-	.why-statement {
-		font-size: clamp(0.92rem, 1.3vw, 1.02rem);
-		color: var(--dim);
-		line-height: 1.85;
-	}
-	.why-statement strong { color: var(--text); font-weight: 500; }
-
-	.zero-dep {
-		border: 1px solid var(--border);
-		padding: 1.25rem 1.5rem;
-	}
-	.zero-dep-tag {
-		font-family: 'DM Mono', monospace;
-		font-size: 0.6rem;
-		letter-spacing: 0.1em;
-		color: var(--accent);
-		margin-bottom: 0.4rem;
-	}
-	.zero-dep-stat {
-		font-family: 'DM Mono', monospace;
-		font-size: 1.75rem;
-		font-weight: 500;
-		color: #fff;
-		line-height: 1;
-		margin-bottom: 0.4rem;
-	}
-	.zero-dep-stat span { color: var(--accent); }
-	.zero-dep-sub {
-		font-size: 0.75rem;
-		color: var(--dim);
-		line-height: 1.55;
+		font-size: .68rem;
+		color: var(--muted);
 	}
 
-	.why-list {
-		display: flex;
-		flex-direction: column;
-	}
-	.why-item {
-		display: grid;
-		grid-template-columns: 60px 1fr;
-		gap: 1.25rem;
-		padding: 1.75rem 0;
-		border-top: 1px solid var(--border);
-		align-items: start;
-	}
-	.why-item:last-child { border-bottom: 1px solid var(--border); }
-	.why-num {
-		font-family: 'DM Mono', monospace;
-		font-size: 0.62rem;
-		color: var(--accent);
-		letter-spacing: 0.05em;
-		padding-top: 0.25rem;
-		opacity: 0.6;
-	}
-	.why-title {
-		font-size: 0.92rem;
-		font-weight: 600;
-		color: #fff;
-		letter-spacing: -0.01em;
-		margin-bottom: 0.4rem;
-	}
-	.why-desc {
-		font-size: 0.82rem;
-		color: var(--dim);
-		line-height: 1.8;
-	}
-	.why-desc strong { color: var(--text); font-weight: 500; }
+	/* ---------- responsive ---------- */
 
-	@media (max-width: 820px) {
-		.why-wrap { padding: 3.5rem 1.5rem; }
-		.why-lead { grid-template-columns: 1fr; gap: 2rem; }
-		.why-item { grid-template-columns: 40px 1fr; gap: 0.75rem; }
+	@media (max-width: 900px) {
+		.hero { grid-template-columns: 1fr; padding-top: 7.5rem; gap: 2.5rem; }
+		.facts { max-width: 460px; }
+		.band-inner { grid-template-columns: 1fr; gap: .9rem; }
+		.band-label { padding-top: 0; }
+		.contact-inner { grid-template-columns: 1fr; align-items: start; }
+		.contact-actions { justify-content: flex-start; }
+		.scope-grid { grid-template-columns: 1fr; gap: 2rem; }
 	}
 
-	.work-wrap {
-		background: var(--s1);
-		border-top: 1px solid var(--border);
-		border-bottom: 1px solid var(--border);
-	}
-	.work-inner { max-width: 1000px; margin: 0 auto; padding: 5rem 2.5rem; }
-
-	.work-head {
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-end;
-		margin-bottom: 2rem;
-	}
-	.work-hint {
-		font-family: 'DM Mono', monospace;
-		font-size: 0.65rem;
-		color: var(--dim);
-		transition: color .2s;
-	}
-	.work-hint:hover { color: var(--text); }
-
-	.vgrid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0.75rem;
+	@media (max-width: 680px) {
+		.shell, .nav-inner, .band-inner, .contact-inner, .footer-inner, .quote p { padding-left: 1.35rem; padding-right: 1.35rem; }
+		.nav-links { gap: 1rem; }
+		.nav-links li:nth-child(2), .nav-links li:nth-child(4) { display: none; }
+		.work-link { grid-template-columns: 96px minmax(0, 1fr); gap: 1rem; }
+		.work-go { display: none; }
+		.footer-inner { flex-direction: column; gap: .35rem; }
+		.contact-actions .btn { width: 100%; }
 	}
 
-	.vcard {
-		display: block;
-		background: var(--bg);
-		border: 1px solid var(--border);
-		overflow: hidden;
-		transition: border-color .2s;
-	}
-	.vcard:hover { border-color: var(--accent); }
-
-	.vcard-thumb {
-		position: relative;
-		aspect-ratio: 16/9;
-		overflow: hidden;
-		background: var(--s2);
-	}
-	.vcard-thumb img {
-		width: 100%; height: 100%;
-		object-fit: cover;
-		display: block;
-		transition: opacity .2s;
-	}
-	.vcard:hover .vcard-thumb img { opacity: 0.75; }
-
-	.play-ring {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-	.play-circle {
-		width: 40px; height: 40px;
-		border: 1px solid rgba(255,255,255,0.2);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: border-color .2s, background .2s;
-	}
-	.vcard:hover .play-circle {
-		border-color: var(--accent);
-		background: rgba(91,141,239,0.15);
-	}
-	.tri {
-		width: 0; height: 0;
-		border-top: 6px solid transparent;
-		border-bottom: 6px solid transparent;
-		border-left: 10px solid rgba(255,255,255,0.7);
-		margin-left: 2px;
-	}
-
-	.vcard-foot {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.7rem 1rem;
-	}
-	.vcard-n {
-		font-family: 'DM Mono', monospace;
-		font-size: 0.58rem;
-		color: var(--accent);
-		letter-spacing: 0.08em;
-		margin-bottom: 0.05rem;
-	}
-	.vcard-cta { font-size: 0.72rem; color: var(--dim); }
-	.vcard-arr { font-size: 0.85rem; color: var(--dim); transition: color .2s; }
-	.vcard:hover .vcard-arr { color: var(--accent); }
-
-	.contact-wrap {
-		padding: 5rem 2.5rem;
-		max-width: 1000px;
-		margin: 0 auto;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 3rem;
-	}
-	.contact-h {
-		font-size: clamp(1.6rem, 3.5vw, 2.8rem);
-		font-weight: 700;
-		letter-spacing: -0.025em;
-		line-height: 1.15;
-		color: #fff;
-		margin-bottom: 0.6rem;
-	}
-	.contact-h span { color: var(--accent); }
-	.contact-sub { font-size: 0.82rem; color: var(--dim); max-width: 380px; line-height: 1.7; }
-	.contact-links { display: flex; gap: 0.6rem; flex-shrink: 0; }
-	.pill {
-		display: inline-flex;
-		align-items: center;
-		font-family: 'DM Mono', monospace;
-		font-size: 0.74rem;
-		font-weight: 500;
-		padding: 0.5rem 1rem;
-		background: var(--s1);
-		border: 1px solid var(--border);
-		color: var(--text);
-		transition: all .15s;
-	}
-	.pill:hover { border-color: var(--accent); color: #fff; }
-
-	.discord-pill { cursor: pointer; font-family: 'DM Mono', monospace; position: relative; }
-	.discord-label { transition: opacity .15s; }
-	.discord-copied {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: var(--s1);
-		color: var(--green);
-		font-size: 0.74rem;
-		font-weight: 500;
-		opacity: 0;
-		pointer-events: none;
-		transition: opacity .15s;
-	}
-	.discord-pill.did-copy .discord-label { opacity: 0; }
-	.discord-pill.did-copy .discord-copied { opacity: 1; }
-
-	footer {
-		border-top: 1px solid var(--border);
-		padding: 1.2rem 2.5rem;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	.footer-logo {
-		font-family: 'DM Mono', monospace;
-		font-size: 0.82rem;
-		font-weight: 500;
-		color: #fff;
-	}
-	.footer-logo span { color: var(--accent); }
-	footer p {
-		font-family: 'DM Mono', monospace;
-		font-size: 0.62rem;
-		color: var(--dim);
-	}
-
-	@keyframes Fade {
-		from { opacity: 0; transform: translateY(12px); }
-		to   { opacity: 1; transform: translateY(0); }
-	}
-
-	@media (max-width: 820px) {
-		nav, .divider { padding: 1rem 1.5rem; }
-		nav { padding: 1rem 1.5rem; }
-		.nav-links { display: none; }
-		.hero { padding: 5rem 1.5rem 3rem; }
-		.sec { padding: 3.5rem 1.5rem; }
-		.about-grid { grid-template-columns: 1fr; gap: 2rem; }
-		.work-inner { padding: 3.5rem 1.5rem; }
-		.vgrid { grid-template-columns: 1fr; }
-		.work-head { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-		.contact-wrap { padding: 3.5rem 1.5rem; flex-direction: column; align-items: flex-start; gap: 1.5rem; }
-		footer { padding: 1rem 1.5rem; flex-direction: column; gap: 0.4rem; text-align: center; }
-		.divider { margin: 0 1.5rem; }
+	@media (prefers-reduced-motion: reduce) {
+		html { scroll-behavior: auto; }
+		*, *::before, *::after { transition-duration: .01ms !important; }
 	}
 	</style>
 </head>
 <body>
 
-<nav id="Nav">
-	<a href="#" class="logo">jubileu<span>.</span></a>
-	<ul class="nav-links">
-		<li><a href="#about">about</a></li>
-		<li><a href="#why">why me</a></li>
-		<li><a href="#work">work</a></li>
-		<li><a href="#contact">contact</a></li>
-	</ul>
-</nav>
+<a class="skip" href="#work">Skip to my work</a>
 
-<section class="hero">
-	<div class="hero-glow glow-a"></div>
-	<div class="hero-inner">
-		<p class="hero-kicker">Roblox · Luau · 6 years</p>
-		<h1 class="hero-title">
-			Frontend &amp; backend.<br>
-			<span class="accent">Scripting only.</span>
-		</h1>
-		<p class="hero-sub">
-			6+ years on Roblox. Backend, gameplay, networking. <strong>Anything you need as long as it doesn't break TOS.</strong> A lot of people on the dev forum just paste code and charge you for it. I write my own.
-		</p>
-		<p class="notice">no modeling, building, animation, or sfx. bring your own</p>
-		<div class="hero-cta">
-			<a href="#work" class="btn btn-blue">see my work →</a>
-			<a href="#contact" class="btn btn-outline">get in touch</a>
-		</div>
+<header class="nav" id="Nav">
+	<div class="nav-inner">
+		<a class="brand" href="#top">jubileu<span style="color:var(--accent)">.</span></a>
+		<nav aria-label="Sections">
+			<ul class="nav-links">
+				<li><a href="#work">work</a></li>
+				<li><a href="#services">services</a></li>
+				<li><a href="#scope">scope</a></li>
+				<li><a href="#process">process</a></li>
+				<li><a href="#contact">contact</a></li>
+			</ul>
+		</nav>
 	</div>
-</section>
+</header>
 
-<div class="divider"></div>
+<main id="top">
 
-<section class="sec" id="about">
-	<p class="sec-label">about</p>
-	<h2 class="sec-title">What I <span class="accent">do</span></h2>
-	<div class="about-grid">
-		<div class="about-body">
-			<p>6 years writing Luau for Roblox. Lead programmer at KMAP Studios, technical degree in quality, studying robotics and advanced computing. I do <strong>custom character controllers, combat state machines, lag compensation, server replication</strong>, stuff most scripters can't.</p>
-			<p>Backend: game logic, secure datastores, inventory tracking. Gameplay: combat engines, movement, TD, whatever you need. I don't use ProfileService, Knit, DataStore2, or FastCast. Everything is written from scratch.</p>
-			<p>If you're tired of paying people who just copy from dev forums or AI, reach out.</p>
+	<div class="shell hero">
+		<div>
+			<p class="hero-label">jub / scripter for hire / 6+ years</p>
+			<h1>I script Roblox games.</h1>
+			<p class="hero-lead">6+ years on Roblox. Backend systems, gameplay mechanics, networking, but honestly anything you need as long as it doesn't break TOS. The market is flooded with people who copy-paste code from dev forums or AI and still charge ginormous prices. I write my own.</p>
 		</div>
-		<div class="spec-list">
-			<div class="spec-item">
-				<p class="spec-tag">combat</p>
-				<p class="spec-desc"><strong>State machines, hitboxes, ability pipelines, server-validated</strong></p>
-			</div>
-			<div class="spec-item">
-				<p class="spec-tag">movement</p>
-				<p class="spec-desc"><strong>Custom controllers, wall-running, vaulting, physics feel</strong></p>
-			</div>
-			<div class="spec-item">
-				<p class="spec-tag">networking</p>
-				<p class="spec-desc"><strong>Client-server sync, lag comp, low bandwidth</strong></p>
-			</div>
-			<div class="spec-item">
-				<p class="spec-tag">backend</p>
-				<p class="spec-desc"><strong>Secure datastores, inventory, data architecture</strong></p>
-			</div>
-			<div class="spec-item">
-				<p class="spec-tag">frontend</p>
-				<p class="spec-desc"><strong>Client scripting, viewport rendering, input</strong></p>
-			</div>
-			<div class="spec-item">
-				<p class="spec-tag">architecture</p>
-				<p class="spec-desc"><strong>Framework design, flat structure, stays clean as it grows</strong></p>
-			</div>
-		</div>
+
+		<dl class="facts">
+			<div class="facts-row"><dt>role</dt><dd>Lead programmer, KMAP Studios</dd></div>
+			<div class="facts-row"><dt>take</dt><dd>Scripting only</dd></div>
+			<div class="facts-row"><dt>written</dt><dd>6+ years of Luau</dd></div>
+			<div class="facts-row"><dt>timezone</dt><dd>UTC-3</dd></div>
+			<div class="facts-row"><dt>paid</dt><dd>PayPal only</dd></div>
+			<div class="facts-row"><dt>discord</dt><dd>jubileuv2</dd></div>
+		</dl>
 	</div>
-</section>
 
-<div class="divider"></div>
-
-<section id="why">
-	<div class="why-wrap">
-		<p class="sec-label">why me</p>
-		<h2 class="sec-title">Why me<span class="accent">.</span></h2>
-		<div class="why-lead">
-			<p class="why-statement">
-				Most scripters can follow a tutorial. Some can write a system from scratch. Very few actually understand both client and server. <strong>I do.</strong>
-			</p>
-			<div class="zero-dep">
-				<p class="zero-dep-tag">dependencies</p>
-				<p class="zero-dep-stat"><span>0</span> third-party modules</p>
-				<p class="zero-dep-sub">No ProfileService, no Knit, no DataStore2, no FastCast. I wrote all my own systems, so I know how they work and why.</p>
-			</div>
-		</div>
-		<div class="why-list">
-
-			<div class="why-item">
-				<span class="why-num">01</span>
-				<div>
-					<p class="why-title">Client and server</p>
-					<p class="why-desc">Only knowing one side is a problem. They're connected, every choice on one affects the other. <strong>Server is authoritative, client is responsive.</strong> Replication connects them properly.</p>
-				</div>
-			</div>
-
-			<div class="why-item">
-				<span class="why-num">02</span>
-				<div>
-					<p class="why-title">Built for real servers</p>
-					<p class="why-desc">100 players, exploiters sending weird data, designers changing things mid project. <strong>Validation and error handling from the start</strong>, not added at the end.</p>
-				</div>
-			</div>
-
-			<div class="why-item">
-				<span class="why-num">03</span>
-				<div>
-					<p class="why-title">Code you can read</p>
-					<p class="why-desc"><strong>Flat, simple, no over the top stuff.</strong> Hand it to the next dev on your team and they'll understand it without me.</p>
-				</div>
-			</div>
-
-			<div class="why-item">
-				<span class="why-num">04</span>
-				<div>
-					<p class="why-title">6 years of experience</p>
-					<p class="why-desc">I already know which replication patterns waste bandwidth, which data layouts cause bugs later, which quick fixes take weeks to undo. <strong>You're not paying me to learn on your project.</strong></p>
-				</div>
-			</div>
-
-		</div>
+	<div class="quote">
+		<p>"Literally anything you need, as long as it doesn't break Roblox TOS."</p>
 	</div>
-</section>
 
-<div class="divider"></div>
-
-<div class="work-wrap" id="work">
-	<div class="work-inner">
-		<div class="work-head">
+	<section class="band" id="services">
+		<div class="band-inner">
+			<p class="band-label">01 / services</p>
 			<div>
-				<p class="sec-label">work</p>
-				<h2 class="sec-title" style="margin-bottom:0">Things I've built</h2>
+				<h2>What I do.</h2>
+				<p class="band-note">If it's code I probably do it. These three come up most.</p>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th scope="col">Area</th>
+								<th scope="col">What that covers</th>
+								<th scope="col">Typical jobs</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<th scope="row">Backend</th>
+								<td>Secure datastores, inventory tracking, saving, validation.</td>
+								<td>Inventories, currency, leaderboards, admin tools</td>
+							</tr>
+							<tr>
+								<th scope="row">Gameplay</th>
+								<td>Combat engines, movement, tower defense, round systems.</td>
+								<td>State machines, combos, abilities, parry</td>
+							</tr>
+							<tr>
+								<th scope="row">Networking</th>
+								<td>Client-server sync, remotes, replication, exploit checks.</td>
+								<td>Hit validation, lag, data sync</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
-			<a href="https://www.youtube.com/@MiRytf" target="_blank" rel="noopener" class="work-hint">↗ full channel</a>
 		</div>
-		<div class="vgrid">
+	</section>
 
-			<a class="vcard" href="https://youtu.be/v7E3tBDjvcs" target="_blank" rel="noopener">
-				<div class="vcard-thumb">
-					<img src="https://img.youtube.com/vi/v7E3tBDjvcs/maxresdefault.jpg" alt="Project 01" loading="lazy">
-					<div class="play-ring"><div class="play-circle"><div class="tri"></div></div></div>
-				</div>
-				<div class="vcard-foot">
-					<div><p class="vcard-n">01</p><p class="vcard-cta">Watch on YouTube</p></div>
-					<span class="vcard-arr">↗</span>
-				</div>
-			</a>
-
-			<a class="vcard" href="https://youtu.be/PfPhaK2b7TI" target="_blank" rel="noopener">
-				<div class="vcard-thumb">
-					<img src="https://img.youtube.com/vi/PfPhaK2b7TI/maxresdefault.jpg" alt="Project 02" loading="lazy">
-					<div class="play-ring"><div class="play-circle"><div class="tri"></div></div></div>
-				</div>
-				<div class="vcard-foot">
-					<div><p class="vcard-n">02</p><p class="vcard-cta">Watch on YouTube</p></div>
-					<span class="vcard-arr">↗</span>
-				</div>
-			</a>
-
-			<a class="vcard" href="https://youtu.be/ZvE0xTjE1n4" target="_blank" rel="noopener">
-				<div class="vcard-thumb">
-					<img src="https://img.youtube.com/vi/ZvE0xTjE1n4/maxresdefault.jpg" alt="Project 03" loading="lazy">
-					<div class="play-ring"><div class="play-circle"><div class="tri"></div></div></div>
-				</div>
-				<div class="vcard-foot">
-					<div><p class="vcard-n">03</p><p class="vcard-cta">Watch on YouTube</p></div>
-					<span class="vcard-arr">↗</span>
-				</div>
-			</a>
-
-			<a class="vcard" href="https://youtu.be/7MhCxEJin7s" target="_blank" rel="noopener">
-				<div class="vcard-thumb">
-					<img src="https://img.youtube.com/vi/7MhCxEJin7s/maxresdefault.jpg" alt="Project 04" loading="lazy">
-					<div class="play-ring"><div class="play-circle"><div class="tri"></div></div></div>
-				</div>
-				<div class="vcard-foot">
-					<div><p class="vcard-n">04</p><p class="vcard-cta">Watch on YouTube</p></div>
-					<span class="vcard-arr">↗</span>
-				</div>
-			</a>
-
-			<a class="vcard" href="https://youtu.be/sQoB2NUmMEo" target="_blank" rel="noopener">
-				<div class="vcard-thumb">
-					<img src="https://img.youtube.com/vi/sQoB2NUmMEo/maxresdefault.jpg" alt="Project 05" loading="lazy">
-					<div class="play-ring"><div class="play-circle"><div class="tri"></div></div></div>
-				</div>
-				<div class="vcard-foot">
-					<div><p class="vcard-n">05</p><p class="vcard-cta">Watch on YouTube</p></div>
-					<span class="vcard-arr">↗</span>
-				</div>
-			</a>
-
-			<a class="vcard" href="https://youtu.be/LLIqp5FVmaU" target="_blank" rel="noopener">
-				<div class="vcard-thumb">
-					<img src="https://img.youtube.com/vi/LLIqp5FVmaU/maxresdefault.jpg" alt="Project 06" loading="lazy">
-					<div class="play-ring"><div class="play-circle"><div class="tri"></div></div></div>
-				</div>
-				<div class="vcard-foot">
-					<div><p class="vcard-n">06</p><p class="vcard-cta">Watch on YouTube</p></div>
-					<span class="vcard-arr">↗</span>
-				</div>
-			</a>
-
-			<a class="vcard" href="https://youtu.be/N9pp2AYrtr0" target="_blank" rel="noopener">
-				<div class="vcard-thumb">
-					<img src="https://img.youtube.com/vi/N9pp2AYrtr0/maxresdefault.jpg" alt="Project 07" loading="lazy">
-					<div class="play-ring"><div class="play-circle"><div class="tri"></div></div></div>
-				</div>
-				<div class="vcard-foot">
-					<div><p class="vcard-n">07</p><p class="vcard-cta">Watch on YouTube</p></div>
-					<span class="vcard-arr">↗</span>
-				</div>
-			</a>
-
+	<section class="band" id="work">
+		<div class="band-inner">
+			<p class="band-label">02 / work</p>
+			<div>
+				<h2>My work.</h2>
+				<p class="band-note">A few showcases from my channel. Everything here is code I wrote.</p>
+				<ul class="work-list">
+					<li class="work-item">
+						<a class="work-link" href="https://youtu.be/v7E3tBDjvcs" target="_blank" rel="noopener">
+							<div class="work-thumb"><img src="https://img.youtube.com/vi/v7E3tBDjvcs/maxresdefault.jpg" alt="" loading="eager"></div>
+							<div>
+								<span class="work-num">01</span>
+								<p class="work-title">Roblox Evil 4</p>
+								<p class="work-tag">Gameplay</p>
+							</div>
+							<span class="work-go">watch on youtube</span>
+						</a>
+					</li>
+					<li class="work-item">
+						<a class="work-link" href="https://youtu.be/PfPhaK2b7TI" target="_blank" rel="noopener">
+							<div class="work-thumb"><img src="https://img.youtube.com/vi/PfPhaK2b7TI/maxresdefault.jpg" alt="" loading="lazy"></div>
+							<div>
+								<span class="work-num">02</span>
+								<p class="work-title">Enchain</p>
+								<p class="work-tag">Combat</p>
+							</div>
+							<span class="work-go">watch on youtube</span>
+						</a>
+					</li>
+					<li class="work-item">
+						<a class="work-link" href="https://youtu.be/ZvE0xTjE1n4" target="_blank" rel="noopener">
+							<div class="work-thumb"><img src="https://img.youtube.com/vi/ZvE0xTjE1n4/maxresdefault.jpg" alt="" loading="lazy"></div>
+							<div>
+								<span class="work-num">03</span>
+								<p class="work-title">Dummy Defense</p>
+								<p class="work-tag">Tower defense</p>
+							</div>
+							<span class="work-go">watch on youtube</span>
+						</a>
+					</li>
+					<li class="work-item">
+						<a class="work-link" href="https://youtu.be/7MhCxEJin7s" target="_blank" rel="noopener">
+							<div class="work-thumb"><img src="https://img.youtube.com/vi/7MhCxEJin7s/maxresdefault.jpg" alt="" loading="lazy"></div>
+							<div>
+								<span class="work-num">04</span>
+								<p class="work-title">Discord 10mb limit</p>
+								<p class="work-tag">Tooling</p>
+							</div>
+							<span class="work-go">watch on youtube</span>
+						</a>
+					</li>
+					<li class="work-item">
+						<a class="work-link" href="https://youtu.be/sQoB2NUmMEo" target="_blank" rel="noopener">
+							<div class="work-thumb"><img src="https://img.youtube.com/vi/sQoB2NUmMEo/maxresdefault.jpg" alt="" loading="lazy"></div>
+							<div>
+								<span class="work-num">05</span>
+								<p class="work-title">Render distanced terrain</p>
+								<p class="work-tag">Rendering</p>
+							</div>
+							<span class="work-go">watch on youtube</span>
+						</a>
+					</li>
+					<li class="work-item">
+						<a class="work-link" href="https://youtu.be/LLIqp5FVmaU" target="_blank" rel="noopener">
+							<div class="work-thumb"><img src="https://img.youtube.com/vi/LLIqp5FVmaU/maxresdefault.jpg" alt="" loading="lazy"></div>
+							<div>
+								<span class="work-num">06</span>
+								<p class="work-title">Custom chat</p>
+								<p class="work-tag">Client</p>
+							</div>
+							<span class="work-go">watch on youtube</span>
+						</a>
+					</li>
+					<li class="work-item">
+						<a class="work-link" href="https://youtu.be/N9pp2AYrtr0" target="_blank" rel="noopener">
+							<div class="work-thumb"><img src="https://img.youtube.com/vi/N9pp2AYrtr0/maxresdefault.jpg" alt="" loading="lazy"></div>
+							<div>
+								<span class="work-num">07</span>
+								<p class="work-title">Hot Potato Timer</p>
+								<p class="work-tag">Commission</p>
+							</div>
+							<span class="work-go">watch on youtube</span>
+						</a>
+					</li>
+				</ul>
+			</div>
 		</div>
-	</div>
-</div>
+	</section>
 
-<div class="contact-wrap" id="contact">
-	<div>
-		<h2 class="contact-h">Want something<br>scripted<span>.</span></h2>
-		<p class="contact-sub">PayPal only, no Robux/crypto/splits. $20+ down, rest negotiable. Bring your assets. I don't do UI, animation, or SFX.</p>
-	</div>
-	<div class="contact-links">
-		<button class="pill discord-pill" onclick="CopyDiscord(this)" aria-label="Copy Discord username">
-			<span class="discord-label">jubileuv2</span>
-			<span class="discord-copied" aria-hidden="true">copied</span>
-		</button>
-		<a href="https://www.roblox.com/users/269577254/profile" target="_blank" rel="noopener" class="pill">roblox</a>
-		<a href="https://www.youtube.com/@MiRytf" target="_blank" rel="noopener" class="pill">youtube</a>
-	</div>
-</div>
+	<section class="band" id="scope">
+		<div class="band-inner">
+			<p class="band-label">03 / scope</p>
+			<div>
+				<h2>Terms and scope.</h2>
+				<p class="band-note">I only script. Everything else is on you.</p>
+				<div class="scope-grid">
+					<div class="scope-col take">
+						<h3>I do</h3>
+						<p>Backend, gameplay, networking. Client or server side, doesn't matter.</p>
+						<p>Existing projects too. Half-finished systems, code someone else wrote, stuff that needs cleaning up.</p>
+					</div>
+					<div class="scope-col">
+						<h3>I don't</h3>
+						<p>UI, animations, SFX, models, building. Anything unrelated to coding really.</p>
+						<p>Please have those ready. If we start without them I have no visual reference for how the game is supposed to work.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
 
-<footer>
-	<span class="footer-logo">jubileu<span>.</span></span>
-	<p>Roblox / Frontend & Backend / Scripting only / 6 yrs</p>
+	<section class="band" id="process">
+		<div class="band-inner">
+			<p class="band-label">04 / process</p>
+			<div>
+				<h2>How it goes.</h2>
+				<ol class="steps">
+					<li><p>Send me the task, your timeline and your budget. DM me or reply to the post.</p></li>
+					<li><p>I tell you if I can take it and what it costs. Payment amount is always negotiable.</p></li>
+					<li><p>You pay the down payment and I start. If we're doing per-task and you forget something, or heavily change your mind on work that's already been done and reviewed, I charge a bit extra for that.</p></li>
+					<li><p>You get the code. Readable, no libraries you have to keep alive, and any scripter can pick it up after me.</p></li>
+				</ol>
+			</div>
+		</div>
+	</section>
+
+	<section class="band" id="about">
+		<div class="band-inner">
+			<p class="band-label">05 / about</p>
+			<div class="about">
+				<h2>About me.</h2>
+				<p>I'm jub, lead programmer at KMAP Studios. I've been scripting on Roblox for 6+ years, I have a technical degree in quality, and I study robotics and advanced computing.</p>
+				<p>I made this page to get away from the copy-paste market and just provide quality. I don't use Knit, ProfileService, DataStore2 or FastCast. I write my own systems, so I know how they work and I can change them later.</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="contact-band" id="contact">
+		<div class="contact-inner">
+			<div>
+				<h2>DM me.</h2>
+				<p>Send me your timeline, your budget and the task you want done. Payment is strictly PayPal. No Robux, no crypto, no revenue splits, no percentages unless a regular payment is provided and not lowered alongside it.</p>
+			</div>
+			<div class="contact-actions">
+				<button class="btn copy" type="button" id="CopyDiscord" aria-live="polite">
+					<span class="label">copy discord: jubileuv2</span>
+					<span class="done">copied</span>
+				</button>
+				<a class="btn" href="https://www.roblox.com/users/269577254/profile" target="_blank" rel="noopener">roblox profile</a>
+				<a class="btn" href="https://www.youtube.com/@MiRytf" target="_blank" rel="noopener">youtube channel</a>
+			</div>
+		</div>
+	</section>
+
+</main>
+
+<footer class="footer">
+	<div class="footer-inner">
+		<span>jubileu.</span>
+		<span>roblox scripter / luau / 6+ years</span>
+		<span>discord jubileuv2</span>
+	</div>
 </footer>
 
 <script>
 	const Nav = document.getElementById('Nav');
+	const Discord = 'jubileuv2';
+	const CopyDiscord = document.getElementById('CopyDiscord');
+
 	window.addEventListener('scroll', () => {
-		Nav.classList.toggle('scrolled', window.scrollY > 40);
+		Nav.classList.toggle('is-stuck', window.scrollY > 16);
 	}, {passive: true});
 
-	function CopyDiscord(Btn) {
-		navigator.clipboard.writeText('jubileuv2').then(() => {
-			Btn.classList.add('did-copy');
-			setTimeout(() => Btn.classList.remove('did-copy'), 1800);
-		});
-	}
+	CopyDiscord.addEventListener('click', async () => {
+		let Ok = false;
+
+		try {
+			await navigator.clipboard.writeText(Discord);
+			Ok = true;
+		} catch {
+			const Field = document.createElement('textarea');
+			Field.value = Discord;
+			Field.setAttribute('readonly', '');
+			Field.style.position = 'fixed';
+			Field.style.top = '-1000px';
+			document.body.appendChild(Field);
+			Field.select();
+			Ok = document.execCommand('copy');
+			Field.remove();
+		}
+
+		if (!Ok) return;
+
+		CopyDiscord.classList.add('is-done');
+		setTimeout(() => CopyDiscord.classList.remove('is-done'), 1600);
+	});
 </script>
 </body>
 </html>
